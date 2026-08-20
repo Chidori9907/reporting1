@@ -584,7 +584,7 @@ int main() {
         b.status = "Completed";
         bookingDB[b.bookingID] = b;
     }
-
+     
     loadDataFromTeamSystem();
 
     cout << "\n[System] Team data loaded successfully!" << endl;
