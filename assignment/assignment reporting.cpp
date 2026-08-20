@@ -572,7 +572,7 @@ int main() {
     string serviceIDs[] = { "SI1001", "SI1002", "SI1003", "SI1004", "SI1005" };
     string staffIDs[] = { "STF1001", "STF1002", "STF1003", "STF1004", "STF1005" };
     string customerIDs[] = { "C1001", "C1002", "C1003", "C1004", "M1001", "M1002" };
-
+     
     for (int i = 0; i < 12; i++) {
         Bookings b;
         b.bookingID = "B" + to_string(1001 + i);
