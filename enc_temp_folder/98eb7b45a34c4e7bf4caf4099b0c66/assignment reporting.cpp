@@ -458,7 +458,7 @@ void RevenueReport(ostream& out = cout) {
     string title = (targetWeek > 0) ? "WEEKLY REVENUE" : "MONTHLY REVENUE";
     displayBarchart(title, targetMonth, targetYear, targetWeek, out);
 }
- 
+
 // Staff Report need staff data
 void StaffReport(ostream& out = cout) {
     int targetMonth, targetYear, targetWeek;

@@ -1,22 +1,23 @@
 
 ========================================================
-      REVENUE REPORT FOR 8/2026 (WEEK 2)
+      MONTHLY REVENUE REPORT FOR 8/2026
 ========================================================
 ID        Service        Qty     Price     Total Amount
 --------------------------------------------------------
-2         Haircut        1       RM50.00   RM 50.00
-3         Massage        1       RM150.00  RM 150.00
-4         Facial         1       RM120.00  RM 120.00
+B1001     HairCut        1       RM30.00   RM 30.00
+B1002     HairStyling    1       RM50.00   RM 50.00
+B1007     HairStyling    1       RM50.00   RM 50.00
+B1008     Colouring      1       RM85.00   RM 85.00
 --------------------------------------------------------
-TOTAL REVENUE GENERATED: RM 320.00
+TOTAL REVENUE GENERATED: RM 215.00
 ========================================================
 
 *** TOP SERVICE ***
- Highest Revenue Service: Massage (Total: RM 150.00, Total Qty: 1)
+ Highest Revenue Service: HairStyling (Total: RM 100.00, Total Qty: 2)
 
-=== WEEKLY REVENUE (BARCHART) ===
+=== MONTHLY REVENUE (BARCHART) ===
 ------------------------------------
-Haircut      | * (RM 50.00)
-Massage      | *** (RM 150.00)
-Facial       | ** (RM 120.00)
+HairCut      |  (RM 30.00)
+HairStyling  | ** (RM 100.00)
+Colouring    | * (RM 85.00)
 ------------------------------------
