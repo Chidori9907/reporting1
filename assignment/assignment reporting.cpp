@@ -586,7 +586,7 @@ void displayBarchart(string reportTitle, int month, int year, int weekFilter, os
                 count++;
             }
         } 
-    }
+    } 
 
     if (count == 0) {
         out << "No completed records found for this timeframe." << endl;
