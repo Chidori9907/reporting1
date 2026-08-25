@@ -2,14 +2,15 @@
 #include <fstream>
 #include <string>
 #include <iomanip>
-#include <unordered_map>
 #include <limits>
 #include <cctype>
+#include <ctime>
 using namespace std;
 
 const int MAX_SIZE = 100;
-//teammates data
+//from jiayih
 struct Customer {
+    string idCustomer;
     string nameCustomer;
     string genderCustomer;
     string phoneCustomer;
@@ -18,6 +19,7 @@ struct Customer {
 };
 
 struct Member {
+    string idMember;
     string nameMember;
     string genderMember;
     string phoneMember;
@@ -26,12 +28,25 @@ struct Member {
 };
 
 struct Staff {
+    string idStaff;
     string nameStaff;
     string genderStaff;
     string phoneStaff;
     string emailStaff;
     string passwordStaff;
     string positionStaff;
+};
+
+struct Timeslot {
+    int id;
+    string time;
+    bool isBooked;
+    string staffID;
+    string staffName;
+    string customerID;
+    string customerName;
+    string service;
+    string status;
 };
 
 struct Services {
@@ -48,48 +63,90 @@ struct Bookings {
     string serviceID;
     string date;
     string time;
-    string status; // confirm, cancelled, completed
+    string status;
 };
 
-// from jiayih
-unordered_map<string, Customer> customerDB = {
-    {"C1001", {"Viknesh a/l Vijayan", "Male", "013-5678901", "viknesh129@gmail.com", "SolarPower2026!"}},
-    {"C1002", {"Priya a/p Anbalagan", "Female", "014-6789012", "priya59@gmail.com", "Bikoma72!q"}},
-    {"C1003", {"Teo Bao Bin", "Male", "016-7890123", "bb520go@gmail.com", "k8n9vp2m5x"}},
-    {"C1004", {"Lily Yee", "Female", "017-8901234", "lilyisflower43@gmail.com", "K0N9VP2M5Z"}},
+int customerCounter = 1005;
+int memberCounter = 1005;
+int staffCounter = 1011;
+
+const int MAX_CUSTOMERS = 100;
+const int MAX_MEMBERS = 100;
+const int MAX_STAFF = 100;
+
+int customerCount = 4;
+int memberCount = 4;
+int staffCount = 10;
+
+const int TOTAL_SLOTS = 7;
+const int DAYS_IN_MONTH = 31;
+
+Timeslot defaultDaySlots[TOTAL_SLOTS] = {
+    {1, "09:00 AM - 11:00 AM", false, "", "", "", "", "", ""},
+    {2, "11:00 AM - 01:00 PM", false, "", "", "", "", "", ""},
+    {3, "01:00 PM - 03:00 PM", false, "", "", "", "", "", ""},
+    {4, "03:00 PM - 05:00 PM", false, "", "", "", "", "", ""},
+    {5, "05:00 PM - 07:00 PM", false, "", "", "", "", "", ""},
+    {6, "07:00 PM - 09:00 PM", false, "", "", "", "", "", ""},
+    {7, "09:00 PM - 11:00 PM", false, "", "", "", "", "", ""}
 };
 
-unordered_map<string, Member> memberDB = {
-    {"M1001", {"Eren Chew", "Male", "017-6543210", "erenono097@gmail.com", "k8N9vP2mX5"}},
-    {"M1002", {"Tan Shin Nang", "Male", "018-2345678", "startan67@gmail.com", "b9M3zP7wR#"}},
-    {"M1003", {"Noor Siti", "Female", "011-12345678", "siti945@gmail.com", "TungtSahur345"}},
-    {"M1004", {"Alice Low", "Female", "019-5678901", "alicelow@gmail.com", "76WhatheDogDoing//"}}
+Timeslot schedule[DAYS_IN_MONTH][TOTAL_SLOTS];
+
+const string RESET = "\033[0m";
+const string RED = "\033[31m";
+const string GREEN = "\033[32m";
+const string YELLOW = "\033[93m";
+
+
+Customer customerDB[MAX_CUSTOMERS] = {
+    {"C1001", "Viknesh a/l Vijayan", "Male", "013-5678901", "viknesh129@gmail.com", "SolarPower2026!"},
+    {"C1002", "Priya a/p Anbalagan", "Female", "014-6789012", "priya59@gmail.com", "Bikoma72!q"},
+    {"C1003", "Teo Bao Bin", "Male", "016-7890123", "bb520go@gmail.com", "k8n9vp2m5x"},
+    {"C1004", "Lily Yee", "Female", "017-8901234", "lilyisflower43@gmail.com", "K0N9VP2M5Z"}
 };
 
-unordered_map<string, Staff> staffDB = {
-    {"STF1001", {"Kim Ji Soo", "Female", "011-2233445", "jisookim123@gmail.com", "k8N9vP2m!", "Hair Stylist"}},
-    {"STF1002", {"Sarah Jenkins", "Female", "017-8899001", "sarah36@gmail.com", "r9W!z2#k&", "Hair Color Stylist"}},
-    {"STF1003", {"Sim Jia Yih", "Female", "011-10546505", "jiayih@gmail.com", "j7N5qW8mX2z%", "Hair Color Stylist"}},
-    {"STF1004", {"Lim Xiao Qing", "Female", "018-9032655", "xiaoqing@gmail.com", "w9K4zM2pR!", "Nail Technician"}},
-    {"STF1005", {"Lim Cai Xuan", "Female", "012-6125939", "caixuan@gmail.com", "t3X8qP5mL9#", "Receptionist"}},
-    {"STF1006", {"Lee Hao Zheng", "Male", "016-5011218", "haozheng@gmail.com", "y8M2!zR9#vW@", "Nail Technician"}},
-    {"STF1007", {"Ng Jun Sheng", "Male", "017-3746889", "junsheng@gmail.com", "h3N9!qX5$k&", "Receptionist"}},
-    {"STF1008", {"Lao Teh", "Male", "017-88990012", "laoteh@gmail.com", "c9P5!xT2$w@", "Skincare Specialist"}},
-    {"STF1009", {"Noor Shahirah", "Female", "010-86043225", "shahirah@gmail.com", "k6P3#wT8$mL&", "Skincare Specialist"}},
-    {"STF1010", {"Roslizawati", "Female", "017-88378451", "rosealwaysrosie@gmail.com", "But860//wt=", "Hair Stylist"}},
-};
-// from junsheng
-unordered_map<string, Services> servicesDB = {
-    {"SI1001", {"SI1001", "HairCut", 30.00, 30}},
-    {"SI1002", {"SI1002", "HairStyling", 50.00, 60}},
-    {"SI1003", {"SI1003", "Colouring", 85.00, 90}},
-    {"SI1004", {"SI1004", "NailArt", 120.00, 90}},
-    {"SI1005", {"SI1005", "Skin Care Treatment", 110.00, 90}},
+Member memberDB[MAX_MEMBERS] = {
+    {"M1001", "Eren Chew", "Male", "017-6543210", "erenono097@gmail.com", "k8N9vP2mX5"},
+    {"M1002", "Tan Shin Nang", "Male", "018-2345678", "startan67@gmail.com", "b9M3zP7wR#"},
+    {"M1003", "Noor Siti", "Female", "011-12345678", "siti945@gmail.com", "TungtSahur345"},
+    {"M1004", "Alice Low", "Female", "019-5678901", "alicelow@gmail.com", "76WhatheDogDoing//"}
 };
 
-unordered_map<string, Bookings> bookingDB;
-int bookingCounter = 1011;
+Staff staffDB[MAX_STAFF] = {
+    {"STF1001", "Kim Ji Soo", "Female", "011-2233445", "jisookim123@gmail.com", "k8N9vP2m!", "Hair Stylist"},
+    {"STF1002", "Sarah Jenkins", "Female", "017-8899001", "sarah36@gmail.com", "r9W!z2#k&", "Hair Color Stylist"},
+    {"STF1003", "Sim Jia Yih", "Female", "011-10546505", "jiayih@gmail.com", "j7N5qW8mX2z%", "Hair Color Stylist"},
+    {"STF1004", "Lim Xiao Qing", "Female", "018-9032655", "xiaoqing@gmail.com", "w9K4zM2pR!", "Nail Technician"},
+    {"STF1005", "Lim Cai Xuan", "Female", "012-6125939", "caixuan@gmail.com", "t3X8qP5mL9#", "Receptionist"},
+    {"STF1006", "Lee Hao Zheng", "Male", "016-5011218", "haozheng@gmail.com", "y8M2!zR9#vW@", "Nail Technician"},
+    {"STF1007", "Ng Jun Sheng", "Male", "017-3746889", "junsheng@gmail.com", "h3N9!qX5$k&", "Receptionist"},
+    {"STF1008", "Lao Teh", "Male", "017-88990012", "laoteh@gmail.com", "c9P5!xT2$w@", "Skincare Specialist"},
+    {"STF1009", "Noor Shahirah", "Female", "010-86043225", "shahirah@gmail.com", "k6P3#wT8$mL&", "Skincare Specialist"},
+    {"STF1010", "Roslizawati", "Female", "017-88378451", "rosealwaysrosie@gmail.com", "But860//wt=", "Hair Stylist"}
+};
 
+const int MAX_SERVICES = 100;
+const int MAX_BOOKINGS = 100;
+
+Services servicesDB[MAX_SERVICES] = {
+    //Service ID, Service Name, Price, Duration
+    {"SI1001", "HairCut", 30.00, 30},
+    {"SI1002", "HairStyling", 50.00, 60},
+    {"SI1003", "Coolouring", 85.00, 90},
+    {"SI1004", "NailArt", 120.00, 90},
+    {"SI1005", "Skin Care Threatment ", 110.00, 90},
+};
+
+Bookings bookingDB[MAX_BOOKINGS];
+
+int serviceCount = 5;
+int bookingCount = 0;
+
+int serviceCounter = 1001;
+int bookingCounter = 1001;
+
+//reporting module
 struct Appointment {
     string appointmentId;
     string customerName;
@@ -108,9 +165,11 @@ Appointment appointments[MAX_SIZE];
 int appointmentCount = 0;
 
 // ========================================
-// REPORTING MODULE - Function Declarations
+//Function Declarations
+// ========================================
 void loadDataFromTeamSystem();
-void SearchBookingReport();   
+void getCurrentSystemTime(int& year, int& month, int& day, int& hour);
+void SearchBookingReport();
 void RevenueReport(ostream& out = cout);
 void StaffReport(ostream& out = cout);
 void displayBarchart(string reportTitle, int month, int year, int weekFilter = 0, ostream& out = cout);
@@ -118,10 +177,52 @@ void ReportExport();
 void reportingMenu();
 // ========================================
 
+int findCustomerIndex(const string& id) {
+    for (int i = 0; i < customerCount; i++)
+        if (customerDB[i].idCustomer == id) return i;
+    return -1;
+}
+
+int findMemberIndex(const string& id) {
+    for (int i = 0; i < memberCount; i++) {
+        if (memberDB[i].idMember == id) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int findStaffIndex(const string& id) {
+    for (int i = 0; i < staffCount; i++) {
+        if (staffDB[i].idStaff == id) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int findServiceIndex(const string& id) {
+    for (int i = 0; i < serviceCount; i++) {
+        if (servicesDB[i].serviceID == id) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int findBookingIndex(const string& id) {
+    for (int i = 0; i < bookingCount; i++) {
+        if (bookingDB[i].bookingID == id) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 bool validateBooking(const Bookings& booking) {
     if (booking.customerID.empty()) return false;
-    if (servicesDB.find(booking.serviceID) == servicesDB.end()) return false;
-    if (staffDB.find(booking.staffID) == staffDB.end()) return false;
+    if (findServiceIndex(booking.serviceID) == -1) return false;
+    if (findStaffIndex(booking.staffID) == -1) return false;
     if (booking.date.empty()) return false;
     if (booking.time.empty()) return false;
     if (booking.status.empty()) return false;
@@ -132,8 +233,8 @@ void viewServices() {
     cout << "\n========================================\n";
     cout << right << setw(10) << "SERVICES\n";
     cout << "========================================\n";
-    for (const auto& entry : servicesDB) {
-        const Services& services = entry.second;
+    for (int i = 0; i < serviceCount; i++) {
+        const Services& services = servicesDB[i];
         cout << "Service ID : " << services.serviceID << "\n";
         cout << "Service    : " << services.servicename << "\n";
         cout << "Price      : RM " << fixed << setprecision(2) << services.price << "\n";
@@ -142,25 +243,26 @@ void viewServices() {
     }
 }
 
+//search booking report--B1011
 void addSingleBooking(const string& customerID) {
     Bookings sinBooking;
     sinBooking.bookingID = "B" + to_string(bookingCounter++);
     sinBooking.customerID = customerID;
-    sinBooking.status = "Confirmed";
+    sinBooking.status = "Booked";
 
     cout << "\n========== ADD SINGLE BOOKING ==========\n";
     viewServices();
 
     cout << "Enter Service ID: ";
     cin >> sinBooking.serviceID;
-    if (servicesDB.find(sinBooking.serviceID) == servicesDB.end()) {
+    if (findServiceIndex(sinBooking.serviceID) == -1) {
         cout << "[Error] Service ID not found.\n";
         return;
     }
 
     cout << "Enter Staff ID: ";
     cin >> sinBooking.staffID;
-    if (staffDB.find(sinBooking.staffID) == staffDB.end()) {
+    if (findStaffIndex(sinBooking.staffID) == -1) {
         cout << "[Error] Staff ID not found.\n";
         return;
     }
@@ -175,110 +277,204 @@ void addSingleBooking(const string& customerID) {
         return;
     }
 
-    bookingDB[sinBooking.bookingID] = sinBooking;
-    cout << "\n[Success] Booking added successfully!\n";
+    if (bookingCount >= MAX_BOOKINGS) {
+        cout << "[Error] Booking database is full.\n";
+        return;
+    }
+
+    bookingDB[bookingCount] = sinBooking;
+    bookingCount++;    cout << "\n[Success] Booking added successfully!\n";
     cout << "Booking ID: " << sinBooking.bookingID << "\n";
 }
-// ========================================
-// ====== test for run, will delete ======
-// ========================================
+
 void setupTestData() {
-    string months[] = { "01", "02", "03", "04", "05", "06",
-                        "07", "08", "09", "10", "11", "12" };
+    bookingCount = 0;
 
-    string serviceIDs[] = { "SI1001", "SI1002", "SI1003", "SI1004", "SI1005" };
-    string staffIDs[] = { "STF1001", "STF1002", "STF1003", "STF1004", "STF1005" };
-    string customerIDs[] = { "C1001", "C1002", "C1003", "C1004", "M1001", "M1002" };
-    int days[] = { 1, 5, 10, 15, 20, 25 };
+    bookingDB[bookingCount++] = { "B1001", "C1001", "STF1001", "SI1001", "15/08/2026", "09:00 AM", "Booked" };
+    bookingDB[bookingCount++] = { "B1002", "M1001", "STF1002", "SI1002", "16/08/2026", "11:00 AM", "Completed" };
+    bookingDB[bookingCount++] = { "B1003", "C1002", "STF1003", "SI1003", "17/08/2026", "01:00 PM", "Booked" };
+    bookingDB[bookingCount++] = { "B1004", "M1002", "STF1004", "SI1004", "18/08/2026", "03:00 PM", "Completed" };
+    bookingDB[bookingCount++] = { "B1005", "C1003", "STF1005", "SI1005", "19/08/2026", "05:00 PM", "Booked" };
+    bookingDB[bookingCount++] = { "B1006", "M1003", "STF1001", "SI1001", "20/08/2026", "09:00 AM", "Completed" };
+    bookingDB[bookingCount++] = { "B1007", "C1004", "STF1002", "SI1002", "21/08/2026", "11:00 AM", "Booked" };
+    bookingDB[bookingCount++] = { "B1008", "M1004", "STF1003", "SI1003", "22/08/2026", "01:00 PM", "Completed" };
+    bookingDB[bookingCount++] = { "B1009", "C1001", "STF1004", "SI1004", "23/08/2026", "03:00 PM", "Booked" };
+    bookingDB[bookingCount++] = { "B1010", "M1001", "STF1005", "SI1005", "24/08/2026", "05:00 PM", "Completed" };
 
-    for (int i = 0; i < 12; i++) {
-        Bookings booking;
-
-        booking.bookingID = "B" + to_string(1001 + i);
-        booking.customerID = customerIDs[i % 6];
-        booking.staffID = staffIDs[i % 5];
-        booking.serviceID = serviceIDs[i % 5];
-
-        string day = to_string(days[i % 6]);
-        if (day.length() == 1) {
-            day = "0" + day;
+    for (int day = 0; day < DAYS_IN_MONTH; day++) {
+        for (int slot = 0; slot < TOTAL_SLOTS; slot++) {
+            schedule[day][slot] = defaultDaySlots[slot];
         }
-
-        booking.date = day + "/" + months[i] + "/2026";
-        booking.time = "10:00";
-        booking.status = "Completed";
-
-        bookingDB[booking.bookingID] = booking;
     }
+    //====== data created for run only ======
+    schedule[0][0].isBooked = true;
+    schedule[0][0].customerName = "Wedding Party A";
+    schedule[0][0].staffName = "Kim Ji Soo";
+    schedule[0][0].service = "Wedding Event";
+    schedule[0][0].status = "Booked";
+
+    schedule[1][2].isBooked = true;
+    schedule[1][2].customerName = "Makeup Client B";
+    schedule[1][2].staffName = "Sim Jia Yih";
+    schedule[1][2].service = "Hair dressing with make up";
+    schedule[1][2].status = "Booked";
+
+    schedule[2][4].isBooked = true;
+    schedule[2][4].customerName = "Wedding Party C";
+    schedule[2][4].staffName = "Sarah Jenkins";
+    schedule[2][4].service = "Wedding Event";
+    schedule[2][4].status = "Completed";
 }
 
 // use teammate data to load Appointment
-void loadDataFromTeamSystem() {
-    appointmentCount = 0;
-    int counter = 1;
+void loadSmallAppointments() {
 
-    if (!bookingDB.empty()) {
-        for (const auto& entry : bookingDB) {
-            const Bookings& booking = entry.second;
+    if (bookingCount == 0) {
+        cout << "No booking data available for reporting.\n";
+        return;
+    }
 
-            // use completed / confirmed appoinment data
-            if (booking.status == "Completed" || booking.status == "Confirmed") {
-                auto itService = servicesDB.find(booking.serviceID);
-                if (itService != servicesDB.end()) {
-                    const Services& service = itService->second;
+    for (int i = 0; i < bookingCount; i++) {
+        const Bookings& booking = bookingDB[i];
 
-                    appointments[appointmentCount].appointmentId = booking.bookingID;
-                   
-                    auto itCust = customerDB.find(booking.customerID);
-                    if (itCust != customerDB.end()) {
-                        appointments[appointmentCount].customerName = itCust->second.nameCustomer;
-                    }
-                    else {
-                        auto itMem = memberDB.find(booking.customerID);
-                        if (itMem != memberDB.end()) {
-                            appointments[appointmentCount].customerName = itMem->second.nameMember;
-                        }
-                        else {
-                            appointments[appointmentCount].customerName = booking.customerID;
-                        }
-                    }
-                 
-                    auto itStaff = staffDB.find(booking.staffID);
-                    if (itStaff != staffDB.end()) {
-                        appointments[appointmentCount].staffName = itStaff->second.nameStaff;
-                    }
-                    else {
-                        appointments[appointmentCount].staffName = booking.staffID;
-                    }
+        if (booking.status != "Completed" && booking.status != "Booked") {
+            continue;
+        }
 
-                    appointments[appointmentCount].serviceName = service.servicename;
-                    appointments[appointmentCount].quantity = 1;
-                    appointments[appointmentCount].price = service.price;
+        int serviceIdx = findServiceIndex(booking.serviceID);
 
-                    if (booking.date.length() >= 10) {
-                        appointments[appointmentCount].day = stoi(booking.date.substr(0, 2));
-                        appointments[appointmentCount].month = stoi(booking.date.substr(3, 2));
-                        appointments[appointmentCount].year = stoi(booking.date.substr(6, 4));
-                    }
-                    else {
-                        appointments[appointmentCount].day = 1;
-                        appointments[appointmentCount].month = 8;
-                        appointments[appointmentCount].year = 2026;
-                    }
+        if (serviceIdx == -1) {
+            continue;
+        }
 
-                    appointments[appointmentCount].timeSlot = booking.time;
-                    appointments[appointmentCount].status = booking.status;
+        if (appointmentCount >= MAX_SIZE) {
+            cout << "Report data is full.\n";
+            return;
+        }
 
-                    appointmentCount++;
-                    counter++;
-                }
+        const Services& service = servicesDB[serviceIdx];
+        appointments[appointmentCount].appointmentId = booking.bookingID;
+
+        int custIdx = findCustomerIndex(booking.customerID);
+        if (custIdx != -1) {
+            appointments[appointmentCount].customerName = customerDB[custIdx].nameCustomer;
+        }
+        else {
+            int memIdx = findMemberIndex(booking.customerID);
+            if (memIdx != -1) {
+                appointments[appointmentCount].customerName = memberDB[memIdx].nameMember;
+            }
+            else {
+                appointments[appointmentCount].customerName = booking.customerID;
             }
         }
+
+        int staffIdx = findStaffIndex(booking.staffID);
+        if (staffIdx != -1) {
+            appointments[appointmentCount].staffName = staffDB[staffIdx].nameStaff;
+        }
+        else {
+            appointments[appointmentCount].staffName = booking.staffID;
+        }
+
+        appointments[appointmentCount].serviceName = service.servicename;
+        appointments[appointmentCount].quantity = 1;
+        appointments[appointmentCount].price = service.price;
+
+        if (booking.date.length() >= 10) {
+            appointments[appointmentCount].day = stoi(booking.date.substr(0, 2));
+            appointments[appointmentCount].month = stoi(booking.date.substr(3, 2));
+            appointments[appointmentCount].year = stoi(booking.date.substr(6, 4));
+        }
+        else {
+            appointments[appointmentCount].day = 1;
+            appointments[appointmentCount].month = 8;
+            appointments[appointmentCount].year = 2026;
+        }
+
+        appointments[appointmentCount].timeSlot = booking.time;
+        appointments[appointmentCount].status = booking.status;
+
+        appointmentCount++;
     }
-    // if bookingDB empty
-    else {
-        cout << "No booking data available for reporting." << endl;
+}
+
+void getCurrentSystemTime(
+    int& year,
+    int& month,
+    int& day,
+    int& hour
+) {
+    time_t now = time(0);
+    tm localTime;
+
+    localtime_s(&localTime, &now);
+
+    year = 1900 + localTime.tm_year;
+    month = 1 + localTime.tm_mon;
+    day = localTime.tm_mday;
+    hour = localTime.tm_hour;
+}
+
+//use schedule[][] to load Appointment
+void loadEventAppointments() {
+    int year, month, currentDay, hour;
+    getCurrentSystemTime(year, month, currentDay, hour);
+
+    for (int dayIndex = 0; dayIndex < DAYS_IN_MONTH; dayIndex++) {
+        for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
+            const Timeslot& slot = schedule[dayIndex][slotIndex];
+
+            //only load booked or completed timeslots
+            if (!slot.isBooked) {
+                continue;
+            }
+
+            if (appointmentCount >= MAX_SIZE) {
+                cout << "Report data is full.\n";
+                return;
+            }
+
+            Appointment& report = appointments[appointmentCount];
+
+            //timeslot does not have appointmentID, so generate report ID using date + slot ID
+            report.appointmentId =
+                "EVENT-D" + to_string(dayIndex + 1) +
+                "-S" + to_string(slot.id);
+
+            report.customerName = slot.customerName;
+            report.staffName = slot.staffName;
+            report.serviceName = slot.service;
+            report.quantity = 1;
+
+            // schedule[0] represents the 1st day of the month
+            report.day = dayIndex + 1;
+            report.month = month;
+            report.year = year;
+            report.timeSlot = slot.time;
+            report.status = slot.status;
+
+            // report price is determined based on the service name since large event team members only store the service name
+            if (slot.service == "Wedding Event") {
+                report.price = 200.00;
+            }
+            else if (slot.service == "Hair dressing with make up") {
+                report.price = 150.00;
+            }
+            else {
+                report.price = 0.00;
+            }
+
+            appointmentCount++;
+        }
     }
+}
+
+void loadDataFromTeamSystem() {
+    appointmentCount = 0;
+
+    loadSmallAppointments();
+    loadEventAppointments();
 }
 
 void SearchBookingReport() {
@@ -288,40 +484,40 @@ void SearchBookingReport() {
     cout << "Enter Booking ID: ";
     cin >> bookingID;
 
-    auto itBooking = bookingDB.find(bookingID);
+    int bookingIdx = findBookingIndex(bookingID);
 
-    if (itBooking == bookingDB.end()) {
+    if (bookingIdx == -1) {
         cout << "Booking record not found.\n";
         return;
     }
 
-    const Bookings& booking = itBooking->second;
+    const Bookings& booking = bookingDB[bookingIdx];
 
     string customerName = booking.customerID;
-    auto itCustomer = customerDB.find(booking.customerID);
+    auto itCustomer = findCustomerIndex(booking.customerID);
 
-    if (itCustomer != customerDB.end()) {
-        customerName = itCustomer->second.nameCustomer;
+    if (itCustomer != -1) {
+        customerName = customerDB[itCustomer].nameCustomer;
     }
     else {
-        auto itMember = memberDB.find(booking.customerID);
-        if (itMember != memberDB.end()) {
-            customerName = itMember->second.nameMember;
+        auto itMember = findMemberIndex(booking.customerID);
+        if (itMember != -1) {
+            customerName = memberDB[itMember].nameMember;
         }
     }
 
     string staffName = booking.staffID;
-    auto itStaff = staffDB.find(booking.staffID);
-    if (itStaff != staffDB.end()) {
-        staffName = itStaff->second.nameStaff;
+    auto itStaff = findStaffIndex(booking.staffID);
+    if (itStaff != -1) {
+        staffName = staffDB[itStaff].nameStaff;
     }
 
     string serviceName = booking.serviceID;
     double price = 0.0;
-    auto itService = servicesDB.find(booking.serviceID);
-    if (itService != servicesDB.end()) {
-        serviceName = itService->second.servicename;
-        price = itService->second.price;
+    auto itService = findServiceIndex(booking.serviceID);
+    if (itService != -1) {
+        serviceName = servicesDB[itService].servicename;
+        price = servicesDB[itService].price;
     }
 
     cout << "\n========== BOOKING REPORT ==========\n";
@@ -360,7 +556,7 @@ void logo() {
 }
 
 // Display Barchart(revenue&staff)
-void displayBarchart(string reportTitle, int month, int year, int weekFilter, ostream& out ) {
+void displayBarchart(string reportTitle, int month, int year, int weekFilter, ostream& out) {
     out << "\n=== " << reportTitle << " (BARCHART) ===" << endl;
     out << "------------------------------------" << endl;
     string services[MAX_SIZE];
@@ -371,7 +567,7 @@ void displayBarchart(string reportTitle, int month, int year, int weekFilter, os
         int currentWeek = (appointments[i].day - 1) / 7 + 1;
         bool weekMatch = (weekFilter == 0) || (currentWeek == weekFilter);
 
-        if (appointments[i].status == "Completed" &&
+        if (appointments[i].status == "Booked" &&
             appointments[i].month == month &&
             appointments[i].year == year &&
             weekMatch)
@@ -389,13 +585,21 @@ void displayBarchart(string reportTitle, int month, int year, int weekFilter, os
                 totals[count] = appointments[i].quantity * appointments[i].price;
                 count++;
             }
-        }
+        } 
     }
 
     if (count == 0) {
         out << "No completed records found for this timeframe." << endl;
-    }
+    } 
     else {
+        int maxLen = 0;
+        for (int i = 0; i < count; i++) {
+            if ((int)services[i].length() > maxLen) {
+                maxLen = services[i].length();
+            }
+        }
+        if (maxLen < 20) maxLen = 20;
+
         for (int i = 0; i < count; i++) {
             out << left << setw(12) << services[i] << " | ";
             int stars = (int)(totals[i] / 50);
@@ -420,24 +624,24 @@ void RevenueReport(ostream& out) {
     double serviceRevenue[MAX_SIZE] = { 0.0 };
     int serviceTypeCount = 0;
 
-    out << "\n========================================================" << endl;
+    out << "\n============================================================================" << endl;
     if (targetWeek > 0)
-        out << "      REVENUE REPORT FOR " << targetMonth << "/" << targetYear << " (WEEK " << targetWeek << ")" << endl;
+        out << "                    REVENUE REPORT FOR " << targetMonth << "/" << targetYear << " (WEEK " << targetWeek << ")" << endl;
     else
-        out << "      MONTHLY REVENUE REPORT FOR " << targetMonth << "/" << targetYear << endl;
-    out << "========================================================" << endl;
-    out << left << setw(10) << "ID"
-        << setw(15) << "Service"
-        << setw(8) << "Qty"
-        << setw(10) << "Price"
+        out << "                    MONTHLY REVENUE REPORT FOR " << targetMonth << "/" << targetYear << endl;
+    out << "============================================================================" << endl;
+    out << left << setw(12) << "ID"
+        << setw(30) << "Service"
+        << setw(6) << "Qty"
+        << setw(12) << "Price"
         << "Total Amount" << endl;
-    out << "--------------------------------------------------------" << endl;
+    out << "----------------------------------------------------------------------------" << endl;
 
     for (int i = 0; i < appointmentCount; i++) {
         int currentWeek = (appointments[i].day - 1) / 7 + 1;
         bool weekMatch = (targetWeek == 0) || (currentWeek == targetWeek);
 
-        if (appointments[i].status == "Completed" &&
+        if (appointments[i].status == "Booked" &&
             appointments[i].month == targetMonth &&
             appointments[i].year == targetYear &&
             weekMatch) {
@@ -445,10 +649,10 @@ void RevenueReport(ostream& out) {
             double amount = appointments[i].quantity * appointments[i].price;
             totalRevenue += amount;
 
-            out << left << setw(10) << appointments[i].appointmentId
-                << setw(15) << appointments[i].serviceName
-                << setw(8) << appointments[i].quantity
-                << "RM" << setw(8) << fixed << setprecision(2) << appointments[i].price
+            out << left << setw(12) << appointments[i].appointmentId
+                << setw(30) << appointments[i].serviceName
+                << setw(6) << appointments[i].quantity
+                << "RM" << setw(12) << fixed << setprecision(2) << appointments[i].price
                 << "RM " << amount << endl;
 
             bool found = false;
@@ -469,9 +673,9 @@ void RevenueReport(ostream& out) {
         }
     }
 
-    out << "--------------------------------------------------------" << endl;
+    out << "----------------------------------------------------------------------------" << endl;
     out << "TOTAL REVENUE GENERATED: RM " << fixed << setprecision(2) << totalRevenue << endl;
-    out << "========================================================" << endl;
+    out << "============================================================================" << endl;
 
     if (serviceTypeCount > 0) {
         int topIdx = 0;
@@ -489,7 +693,7 @@ void RevenueReport(ostream& out) {
     string title = (targetWeek > 0) ? "WEEKLY REVENUE" : "MONTHLY REVENUE";
     displayBarchart(title, targetMonth, targetYear, targetWeek, out);
 }
- 
+
 // Staff Report--staff data
 void StaffReport(ostream& out) {
     int targetMonth, targetYear, targetWeek;
@@ -506,7 +710,7 @@ void StaffReport(ostream& out) {
         int currentWeek = (appointments[i].day - 1) / 7 + 1;
         bool weekMatch = (targetWeek == 0) || (currentWeek == targetWeek);
 
-        if (appointments[i].status == "Completed" &&
+        if (appointments[i].status == "Booked" &&
             appointments[i].month == targetMonth &&
             appointments[i].year == targetYear && weekMatch)
         {
@@ -599,13 +803,12 @@ void reportingMenu() {
 // MAIN
 int main() {
     logo();
-    
-    setupTestData();    //test for run,will delete
+    setupTestData();
     loadDataFromTeamSystem();
 
     cout << "\n[System] Team data loaded successfully!" << endl;
-    cout << "[System] Services: " << servicesDB.size()
-        << " | Staff: " << staffDB.size()
+    cout << "[System] Services: " << serviceCount
+        << " | Staff: " << staffCount
         << " | Appointments: " << appointmentCount << endl;
 
     int option;
@@ -614,10 +817,10 @@ int main() {
         cin >> option;
 
         switch (option) {
-        
+
         case 1:
             SearchBookingReport();
-            break; 
+            break;
         case 2:
             RevenueReport();
             break;
