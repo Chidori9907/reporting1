@@ -573,7 +573,7 @@ void RevenueReport(ostream& out) {
     out << "----------------------------------------------------------------------------" << endl;
     
     for (int i = 0; i < serviceTypeCount; i++) {
-        totalRevenue += serviceRevenue[i];
+        totalRevenue += serviceRevenue[i]; 
 
         out << left << setw(28) << serviceNames[i]
             << right << setw(4) << "RM " << setw(7) << fixed << setprecision(2) << serviceUnitPrice[i]
