@@ -1,26 +1,14 @@
 
 ============================================================================
-                 MONTHLY STAFF WORKLOAD REPORT FOR 8/2026
+                    MONTHLY REVENUE REPORT FOR 0/0
 ============================================================================
-Staff Name                                  Services Handled
+ID          Service                       Qty     Price       Total Amount
 ----------------------------------------------------------------------------
-Kim Ji Soo                                                 3
-Sarah Jenkins                                              3
-Sim Jia Yih                                                3
-Lim Xiao Qing                                              2
-Lim Cai Xuan                                               2
 ----------------------------------------------------------------------------
-TOTAL SERVICES COMPLETED:                                 13
+TOTAL REVENUE GENERATED: RM 0.00
 ============================================================================
 
-*** MOST ACTIVE STAFF ***
- Top Performer: Kim Ji Soo (Total Services: 3)
-
-=== MONTHLY STAFF WORKLOAD (BARCHART) ===
+=== MONTHLY REVENUE (BARCHART) ===
 ------------------------------------
-Kim Ji Soo                   | ***   (3 times)
-Sarah Jenkins                | ***   (3 times)
-Sim Jia Yih                  | ***   (3 times)
-Lim Xiao Qing                | **   (2 times)
-Lim Cai Xuan                 | **   (2 times)
+No records found for this timeframe.
 ------------------------------------
