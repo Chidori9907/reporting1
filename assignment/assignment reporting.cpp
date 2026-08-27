@@ -521,7 +521,7 @@ void RevenueReport(ostream& out) {
     cout << "\nEnter Month/Year/Week (week0 is for Monthly): ";
     cin >> targetMonth >> targetYear >> targetWeek;
 
-    loadDataFromTeamSystem();
+    loadDataFromTeamSystem(); 
 
     string serviceNames[MAX_SIZE];
     int serviceQty[MAX_SIZE] = { 0 };           
