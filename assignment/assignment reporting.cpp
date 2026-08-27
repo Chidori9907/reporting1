@@ -566,7 +566,7 @@ void RevenueReport(ostream& out) {
     else
         out << "                    MONTHLY REVENUE REPORT FOR " << targetMonth << "/" << targetYear << endl;
     out << "============================================================================" << endl;
-    out << left << setw(28) << "Service Name"
+    out << left << setw(28) << "Service Name" 
         << right << setw(10) << "Unit Price"
         << setw(12) << "Total Qty"
         << setw(17) << "Total Amount" << endl;
