@@ -1,36 +1,14 @@
 
 ============================================================================
-                    MONTHLY REVENUE REPORT FOR 8/2026
+                    MONTHLY REVENUE REPORT FOR 0/0
 ============================================================================
 ID          Service                       Qty     Price       Total Amount
 ----------------------------------------------------------------------------
-B1001       HairCut                        1    RM  30.00      RM    30.00
-B1002       HairStyling                    1    RM  50.00      RM    50.00
-B1003       Coolouring                     1    RM  85.00      RM    85.00
-B1004       NailArt                        1    RM 120.00      RM   120.00
-B1005       Skin Care Threatment           1    RM 110.00      RM   110.00
-B1006       HairCut                        1    RM  30.00      RM    30.00
-B1007       HairStyling                    1    RM  50.00      RM    50.00
-B1008       Coolouring                     1    RM  85.00      RM    85.00
-B1009       NailArt                        1    RM 120.00      RM   120.00
-B1010       Skin Care Threatment           1    RM 110.00      RM   110.00
-EVENT-D1-S1 Wedding Event                  1    RM 200.00      RM   200.00
-EVENT-D2-S3 Hair dressing with make up     1    RM 150.00      RM   150.00
-EVENT-D3-S5 Wedding Event                  1    RM 200.00      RM   200.00
 ----------------------------------------------------------------------------
-TOTAL REVENUE GENERATED: RM 1340.00
+TOTAL REVENUE GENERATED: RM 0.00
 ============================================================================
-
-*** TOP SERVICE ***
- Highest Revenue Service: Wedding Event (Total: RM 400.00, Total Qty: 2)
 
 === MONTHLY REVENUE (BARCHART) ===
 ------------------------------------
-   (RM 60.00)
-   (RM 100.00)
-   (RM 170.00)
-   (RM 240.00)
-   (RM 220.00)
-   (RM 400.00)
-   (RM 150.00)
+No records found for this timeframe.
 ------------------------------------
