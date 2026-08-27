@@ -571,7 +571,7 @@ void RevenueReport(ostream& out) {
         << setw(12) << "Total Qty"
         << setw(17) << "Total Amount" << endl;
     out << "----------------------------------------------------------------------------" << endl;
-    
+     
     for (int i = 0; i < serviceTypeCount; i++) {
         totalRevenue += serviceRevenue[i]; 
 
