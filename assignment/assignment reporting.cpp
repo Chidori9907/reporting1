@@ -126,14 +126,14 @@ Staff staffDB[MAX_STAFF] = {
     {"STF1010", "Roslizawati", "Female", "017-88378451", "rosealwaysrosie@gmail.com", "But860//wt=", "Hair Stylist"}
 };
 
-const int MAX_SERVICES = 100;
+const int MAX_SERVICES = 100; 
 const int MAX_BOOKINGS = 100;
 
 Services servicesDB[MAX_SERVICES] = {
     //Service ID, Service Name, Price, Duration
     {"SI1001", "HairCut", 30.00, 30},
     {"SI1002", "HairStyling", 50.00, 60},
-    {"SI1003", "Coolouring", 85.00, 90},
+    {"SI1003", "Coolouring", 85.00, 90}, 
     {"SI1004", "NailArt", 120.00, 90},
     {"SI1005", "Skin Care Threatment ", 110.00, 90},
 };
@@ -556,55 +556,58 @@ void logo() {
 }
 
 // Display Barchart(revenue&staff)
-void displayBarchart(string reportTitle, int month, int year, int weekFilter, ostream& out) {
+void displayBarchart(string reportTitle, int month, int year, int weekFilter, int type, ostream& out) {
     out << "\n=== " << reportTitle << " (BARCHART) ===" << endl;
     out << "------------------------------------" << endl;
-    string services[MAX_SIZE];
-    double totals[MAX_SIZE] = { 0 };
+
+    string names[MAX_SIZE];
+    double values[MAX_SIZE] = { 0 };
     int count = 0;
 
     for (int i = 0; i < appointmentCount; i++) {
         int currentWeek = (appointments[i].day - 1) / 7 + 1;
         bool weekMatch = (weekFilter == 0) || (currentWeek == weekFilter);
 
-        if (appointments[i].status == "Booked" &&
+        if ((appointments[i].status == "Booked" || appointments[i].status == "Completed") &&
             appointments[i].month == month &&
-            appointments[i].year == year &&
-            weekMatch)
+            appointments[i].year == year && weekMatch)
         {
+            string key = (type == 1) ? appointments[i].serviceName : appointments[i].staffName;
+            double val = (type == 1) ? (appointments[i].quantity * appointments[i].price) : appointments[i].quantity;
+
             bool found = false;
             for (int j = 0; j < count; j++) {
-                if (services[j] == appointments[i].serviceName) {
-                    totals[j] += (appointments[i].quantity * appointments[i].price);
+                if (names[j] == key) {
+                    values[j] += val;
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                services[count] = appointments[i].serviceName;
-                totals[count] = appointments[i].quantity * appointments[i].price;
+                names[count] = key;
+                values[count] = val;
                 count++;
             }
-        } 
-    } 
+        }
+    }
 
     if (count == 0) {
-        out << "No completed records found for this timeframe." << endl;
-    } 
+        out << "No records found for this timeframe." << endl;
+    }
     else {
-        int maxLen = 0;
         for (int i = 0; i < count; i++) {
-            if ((int)services[i].length() > maxLen) {
-                maxLen = services[i].length();
-            }
-        }
-        if (maxLen < 20) maxLen = 20;
+            cout << left << setw(28) << names[i] << " | ";
 
-        for (int i = 0; i < count; i++) {
-            out << left << setw(12) << services[i] << " | ";
-            int stars = (int)(totals[i] / 50);
-            for (int k = 0; k < stars; k++) out << "*";
-            out << " (RM " << fixed << setprecision(2) << totals[i] << ")" << endl;
+            int stars = (type == 1) ? (int)(values[i] / 50) : (int)values[i];            
+            for (int k = 0; k < stars; k++) 
+                cout << "*";
+
+            if (type == 1) {
+                out << "   (RM " << fixed << setprecision(2) << values[i] << ")" << endl;
+            }
+            else {
+                out << "   (" << (int)values[i] << " times)" << endl;
+            }
         }
     }
     out << "------------------------------------" << endl;
@@ -612,6 +615,7 @@ void displayBarchart(string reportTitle, int month, int year, int weekFilter, os
 
 // Revenue Report--services data
 void RevenueReport(ostream& out) {
+    appointmentCount = 0; 
     int targetMonth, targetYear, targetWeek;
     cout << "\nEnter Month/Year/Week (week0 is for Monthly): ";
     cin >> targetMonth >> targetYear >> targetWeek;
@@ -632,7 +636,7 @@ void RevenueReport(ostream& out) {
     out << "============================================================================" << endl;
     out << left << setw(12) << "ID"
         << setw(30) << "Service"
-        << setw(6) << "Qty"
+        << setw(8) << "Qty"
         << setw(12) << "Price"
         << "Total Amount" << endl;
     out << "----------------------------------------------------------------------------" << endl;
@@ -641,7 +645,7 @@ void RevenueReport(ostream& out) {
         int currentWeek = (appointments[i].day - 1) / 7 + 1;
         bool weekMatch = (targetWeek == 0) || (currentWeek == targetWeek);
 
-        if (appointments[i].status == "Booked" &&
+        if ((appointments[i].status == "Booked" || appointments[i].status == "Completed") &&
             appointments[i].month == targetMonth &&
             appointments[i].year == targetYear &&
             weekMatch) {
@@ -651,9 +655,9 @@ void RevenueReport(ostream& out) {
 
             out << left << setw(12) << appointments[i].appointmentId
                 << setw(30) << appointments[i].serviceName
-                << setw(6) << appointments[i].quantity
-                << "RM" << setw(12) << fixed << setprecision(2) << appointments[i].price
-                << "RM " << amount << endl;
+                << right << setw(2) << appointments[i].quantity
+                << right << setw(6) << "RM" << setw(7) << fixed << setprecision(2) << appointments[i].price
+                << setw(9) << "RM " << setw(8) << amount << endl;
 
             bool found = false;
             for (int j = 0; j < serviceTypeCount; j++) {
@@ -691,11 +695,12 @@ void RevenueReport(ostream& out) {
     }
 
     string title = (targetWeek > 0) ? "WEEKLY REVENUE" : "MONTHLY REVENUE";
-    displayBarchart(title, targetMonth, targetYear, targetWeek, out);
+    displayBarchart(title, targetMonth, targetYear, targetWeek, 1, out);
 }
 
 // Staff Report--staff data
 void StaffReport(ostream& out) {
+    appointmentCount = 0; 
     int targetMonth, targetYear, targetWeek;
     cout << "\nEnter Month Year Week (week0 is for Monthly): ";
     cin >> targetMonth >> targetYear >> targetWeek;
@@ -730,30 +735,8 @@ void StaffReport(ostream& out) {
         }
     }
 
-    out << "\n=== STAFF WORKLOAD REPORT FOR " << targetMonth << "/" << targetYear;
-    if (targetWeek > 0) out << " (WEEK " << targetWeek << ")";
-    out << " ===" << endl;
-    out << "------------------------------------" << endl;
-    out << left << setw(15) << "Staff Name" << "Services Handled" << endl;
-    out << "------------------------------------" << endl;
-
-    if (uniqueStaff == 0) {
-        out << "No staff workload found for this timeframe." << endl;
-    }
-    else {
-        for (int i = 0; i < uniqueStaff; i++) {
-            out << left << setw(15) << staffNames[i] << serviceCounts[i] << endl;
-        }
-    }
-    out << "------------------------------------" << endl;
-
-    out << "\n=== STAFF WORKLOAD (BARCHART) ===" << endl;
-    for (int i = 0; i < uniqueStaff; i++) {
-        out << left << setw(10) << staffNames[i] << " | ";
-        for (int k = 0; k < serviceCounts[i]; k++) out << "*";
-        out << " (" << serviceCounts[i] << " services)" << endl;
-    }
-    out << "------------------------------------" << endl;
+    string title = (targetWeek > 0) ? "WEEKLY STAFF WORKLOAD" : "MONTHLY STAFF WORKLOAD";
+    displayBarchart(title, targetMonth, targetYear, targetWeek, 2, out);
 }
 
 // Report Export
