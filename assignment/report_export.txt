@@ -1,14 +1,30 @@
 
 ============================================================================
-                    MONTHLY REVENUE REPORT FOR 0/0
+                    MONTHLY REVENUE REPORT FOR 8/2026
 ============================================================================
-ID          Service                       Qty     Price       Total Amount
+Service Name                Unit Price   Total Qty     Total Amount
 ----------------------------------------------------------------------------
+HairCut                      RM   30.00        2        RM     60.00
+HairStyling                  RM   50.00        2        RM    100.00
+Coolouring                   RM   85.00        2        RM    170.00
+NailArt                      RM  120.00        2        RM    240.00
+Skin Care Threatment         RM  110.00        2        RM    220.00
+Wedding Event                RM  200.00        2        RM    400.00
+Hair dressing with make up   RM  150.00        1        RM    150.00
 ----------------------------------------------------------------------------
-TOTAL REVENUE GENERATED: RM 0.00
+TOTAL REVENUE GENERATED: RM 1340.00
 ============================================================================
+
+*** TOP SERVICE ***
+ Highest Revenue Service: Wedding Event (Total: RM 400.00, Total Qty: 2)
 
 === MONTHLY REVENUE (BARCHART) ===
 ------------------------------------
-No records found for this timeframe.
+HairCut                      | *   (RM 60.00)
+HairStyling                  | **   (RM 100.00)
+Coolouring                   | ***   (RM 170.00)
+NailArt                      | ****   (RM 240.00)
+Skin Care Threatment         | ****   (RM 220.00)
+Wedding Event                | ********   (RM 400.00)
+Hair dressing with make up   | ***   (RM 150.00)
 ------------------------------------
