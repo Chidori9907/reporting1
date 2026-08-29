@@ -23,6 +23,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="schedule_data.txt" />
+    <Text Include="schedule_data.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

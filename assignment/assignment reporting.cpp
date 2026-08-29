@@ -412,7 +412,6 @@ void loadAppointments() {
 
                 TotalBooking_Report& report = bookingReport[Booking_reportCount];
 
-                //timeslot does not have appointmentID, so generate report ID using date + slot ID
                 report.appointmentId = slot.appointmentID;
                 report.customerName = slot.customerName;
                 report.staffName = slot.staffName;
@@ -424,6 +423,8 @@ void loadAppointments() {
                 report.year = year;
                 report.timeSlot = slot.time;
                 report.status = slot.status;
+
+                Booking_reportCount++;
             }
         }
     }
@@ -765,9 +766,15 @@ void reporting() {
 
 // MAIN
 int main() {
+    logo();
     inYearlySchedule();
     LoadScheduleFromFile();
     loadDataFromTeamSystem();
+
+    cout << "[System] Services: " << serviceCount
+        << " | Staff: " << staffCount
+        << " | Appointments: " << Booking_reportCount << endl;
+
     reporting();
 
     return 0;

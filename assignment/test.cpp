@@ -115,7 +115,7 @@
 //    {7, "09:00 PM - 11:00 PM", "", false, "", "", "", "", "", "", 0}
 //};
 //
-//Timeslot schedule[MONTH_IN_YEAR][DAYS_IN_MONTH][TOTAL_SLOTS];  
+//Timeslot schedule[MONTH_IN_YEAR][DAYS_IN_MONTH][TOTAL_SLOTS];
 ////=======================from junsheng=======================
 //struct Services
 //{
@@ -400,33 +400,33 @@
 //    for (int monthIndex = 0; monthIndex < MONTH_IN_YEAR; monthIndex++) {
 //        for (int dayIndex = 0; dayIndex < DAYS_IN_MONTH; dayIndex++) {
 //            for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
-//            Timeslot& slot = schedule[monthIndex][dayIndex][slotIndex];
+//                Timeslot& slot = schedule[monthIndex][dayIndex][slotIndex];
 //
-//            //only load booked or completed timeslots
-//            if (!slot.isBooked) {
-//                continue;
-//            }
+//                //only load booked or completed timeslots
+//                if (!slot.isBooked) {
+//                    continue;
+//                }
 //
-//            if (Booking_reportCount >= MAX_SIZE) {
-//                cout << "Report data is full.\n";
-//                return;
-//            }
+//                if (Booking_reportCount >= MAX_SIZE) {
+//                    cout << "Report data is full.\n";
+//                    return;
+//                }
 //
-//            TotalBooking_Report& report = bookingReport[Booking_reportCount];
+//                TotalBooking_Report& report = bookingReport[Booking_reportCount];
 //
-//            report.appointmentId = slot.appointmentID;
-//            report.customerName = slot.customerName;
-//            report.staffName = slot.staffName;
-//            report.serviceName = slot.service;
-//            report.price = slot.price;
-//            report.quantity = 1;
-//            report.day = dayIndex + 1;
-//            report.month = monthIndex + 1;
-//            report.year = year;
-//            report.timeSlot = slot.time;
-//            report.status = slot.status;
+//                report.appointmentId = slot.appointmentID;
+//                report.customerName = slot.customerName;
+//                report.staffName = slot.staffName;
+//                report.serviceName = slot.service;
+//                report.price = slot.price;
+//                report.quantity = 1;
+//                report.day = dayIndex + 1;
+//                report.month = monthIndex + 1;
+//                report.year = year;
+//                report.timeSlot = slot.time;
+//                report.status = slot.status;
 //
-//            Booking_reportCount++;
+//                Booking_reportCount++;
 //            }
 //        }
 //    }
