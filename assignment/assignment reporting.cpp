@@ -682,18 +682,6 @@ void StaffReport(ostream& out) {
         << right << setw(20) << totalServicesHandled << endl;
     out << "============================================================================" << endl;
 
-    // statistic the most actve staff
-    if (uniqueStaff > 0) {
-        int topIdx = 0;
-        for (int i = 1; i < uniqueStaff; i++) {
-            if (serviceCounts[i] > serviceCounts[topIdx]) {
-                topIdx = i;
-            }
-        }
-        out << "\n*** MOST ACTIVE STAFF ***" << endl;
-        out << " Top Performer: " << staffNames[topIdx]
-            << " (Total Services: " << serviceCounts[topIdx] << ")" << endl;
-    }
     string title = (targetWeek > 0) ? "WEEKLY STAFF WORKLOAD" : "MONTHLY STAFF WORKLOAD";
     displayBarchart(title, targetMonth, targetYear, targetWeek, 2, out);
 }
@@ -759,7 +747,7 @@ void reporting() {
             ReportExport();
             break;
         case 0:
-            cout << "\nExiting program. Goodbye!" << endl;
+            cout << "\nExiting program." << endl;
             break;
         default:
             cout << "\nInvalid option. Please try again." << endl;
