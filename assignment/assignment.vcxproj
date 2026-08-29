@@ -126,6 +126,9 @@
     <ClCompile Include="test.cpp" />
     <ClCompile Include="assignment reporting.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="schedule_data.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

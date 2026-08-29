@@ -81,6 +81,7 @@ Staff staffDB[MAX_STAFF] = {
 struct Timeslot {
     int num;
     string time;
+    string appointmentID;
     bool isBooked;
     string staffID;
     string staffName;
@@ -88,21 +89,28 @@ struct Timeslot {
     string customerName;
     string service;
     string status;
-    string appointmentID;
     double price;
 };
 
+const string RESET = "\033[0m";
+const string RED = "\033[31m";
+const string GREEN = "\033[32m";
+const string YELLOW = "\033[93m";
+
+int appointmentCounter = 1001;
 const int TOTAL_SLOTS = 7;
+const int MONTH_IN_YEAR = 12;
 const int DAYS_IN_MONTH = 31;
+const int daysInMonth[MONTH_IN_YEAR] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 Timeslot defaultDaySlots[TOTAL_SLOTS] = {
-    {1, "09:00 AM - 11:00 AM", false, "", "", "", "", "", "", "", 0.0},
-    {2, "11:00 AM - 01:00 PM", false, "", "", "", "", "", "", "", 0.0},
-    {3, "01:00 PM - 03:00 PM", false, "", "", "", "", "", "", "", 0.0},
-    {4, "03:00 PM - 05:00 PM", false, "", "", "", "", "", "", "", 0.0},
-    {5, "05:00 PM - 07:00 PM", false, "", "", "", "", "", "", "", 0.0},
-    {6, "07:00 PM - 09:00 PM", false, "", "", "", "", "", "", "", 0.0},
-    {7, "09:00 PM - 11:00 PM", false, "", "", "", "", "", "", "", 0.0}
+    {1, "09:00 AM - 11:00 AM", "", false, "", "", "", "", "", "", 0},
+    {2, "11:00 AM - 01:00 PM", "", false, "", "", "", "", "", "", 0},
+    {3, "01:00 PM - 03:00 PM", "", false, "", "", "", "", "", "", 0},
+    {4, "03:00 PM - 05:00 PM", "", false, "", "", "", "", "", "", 0},
+    {5, "05:00 PM - 07:00 PM", "", false, "", "", "", "", "", "", 0},
+    {6, "07:00 PM - 09:00 PM", "", false, "", "", "", "", "", "", 0},
+    {7, "09:00 PM - 11:00 PM", "", false, "", "", "", "", "", "", 0}
 };
 
 Timeslot schedule[DAYS_IN_MONTH][TOTAL_SLOTS];
@@ -128,6 +136,12 @@ struct Bookings {
 const int MAX_SERVICES = 100; 
 const int MAX_BOOKINGS = 100;
 
+int serviceCount = 5;
+int bookingCount = 0;
+
+int serviceCounter = 1001;
+int bookingCounter = 1001;
+
 Services servicesDB[MAX_SERVICES] = {
     //Service ID, Service Name, Price, Duration
     {"SI1001", "HairCut", 30.00, 30},
@@ -137,13 +151,18 @@ Services servicesDB[MAX_SERVICES] = {
     {"SI1005", "Skin Care Threatment ", 110.00, 90},
 };
 
-Bookings bookingDB[MAX_BOOKINGS];
-
-int serviceCount = 5;
-int bookingCount = 0;
-
-int serviceCounter = 1001;
-int bookingCounter = 1001;
+Bookings bookingDB[MAX_BOOKINGS] = {
+    { "B1001", "C1001", "STF1001", "SI1001", "15/08/2026", "09:00 AM", "Booked" },
+    { "B1002", "M1001", "STF1002", "SI1002", "16/08/2026", "11:00 AM", "Completed" },
+    { "B1003", "C1002", "STF1003", "SI1003", "17/08/2026", "01:00 PM", "Booked" },
+    { "B1004", "M1002", "STF1004", "SI1004", "18/08/2026", "03:00 PM", "Completed" },
+    { "B1005", "C1003", "STF1005", "SI1005", "19/08/2026", "05:00 PM", "Booked" },
+    { "B1006", "M1003", "STF1001", "SI1001", "20/08/2026", "09:00 AM", "Completed" },
+    { "B1007", "C1004", "STF1002", "SI1002", "21/08/2026", "11:00 AM", "Booked" },
+    { "B1008", "M1004", "STF1003", "SI1003", "22/08/2026", "01:00 PM", "Completed" },
+    { "B1009", "C1001", "STF1004", "SI1004", "23/08/2026", "03:00 PM", "Booked" },
+    { "B1010", "M1001", "STF1005", "SI1005", "24/08/2026", "05:00 PM", "Completed" },
+};
 /////// ========================================================================================================== ///////
 
 //=======================from jiayih=======================
@@ -199,11 +218,12 @@ int findMemberIndex(const string& id);
 int findStaffIndex(const string& id);
 int findServiceIndex(const string& id);
 int findBookingIndex(const string& id);
+// reporting
 bool isValidDateRange(int month, int year, int week);
 void setupTestData();
-void loadSmallAppointments();
+void loadService();
 void getCurrentSystemTime(int& year, int& month, int& day, int& hour);
-void loadEventAppointments();
+void loadAppointments();
 void loadDataFromTeamSystem();
 void logo();
 void displayBarchart(string reportTitle, int month, int year, int weekFilter, int type, ostream& out = cout);
@@ -244,48 +264,8 @@ bool isValidDateRange(int month, int year, int week) {
     return true;
 }
 
-// ** data created for run only ** //
-void setupTestData() {
-    bookingCount = 0;
-
-    bookingDB[bookingCount++] = { "B1001", "C1001", "STF1001", "SI1001", "15/08/2026", "09:00 AM", "Booked" };
-    bookingDB[bookingCount++] = { "B1002", "M1001", "STF1002", "SI1002", "16/08/2026", "11:00 AM", "Completed" };
-    bookingDB[bookingCount++] = { "B1003", "C1002", "STF1003", "SI1003", "17/08/2026", "01:00 PM", "Booked" };
-    bookingDB[bookingCount++] = { "B1004", "M1002", "STF1004", "SI1004", "18/08/2026", "03:00 PM", "Completed" };
-    bookingDB[bookingCount++] = { "B1005", "C1003", "STF1005", "SI1005", "19/08/2026", "05:00 PM", "Booked" };
-    bookingDB[bookingCount++] = { "B1006", "M1003", "STF1001", "SI1001", "20/08/2026", "09:00 AM", "Completed" };
-    bookingDB[bookingCount++] = { "B1007", "C1004", "STF1002", "SI1002", "21/08/2026", "11:00 AM", "Booked" };
-    bookingDB[bookingCount++] = { "B1008", "M1004", "STF1003", "SI1003", "22/08/2026", "01:00 PM", "Completed" };
-    bookingDB[bookingCount++] = { "B1009", "C1001", "STF1004", "SI1004", "23/08/2026", "03:00 PM", "Booked" };
-    bookingDB[bookingCount++] = { "B1010", "M1001", "STF1005", "SI1005", "24/08/2026", "05:00 PM", "Completed" };
-
-    for (int day = 0; day < DAYS_IN_MONTH; day++) {
-        for (int slot = 0; slot < TOTAL_SLOTS; slot++) {
-            schedule[day][slot] = defaultDaySlots[slot];
-        }
-    }
-
-    schedule[0][0].isBooked = true;
-    schedule[0][0].customerName = "Wedding Party A";
-    schedule[0][0].staffName = "Kim Ji Soo";
-    schedule[0][0].service = "Wedding Event";
-    schedule[0][0].status = "Booked";
-
-    schedule[1][2].isBooked = true;
-    schedule[1][2].customerName = "Makeup Client B";
-    schedule[1][2].staffName = "Sim Jia Yih";
-    schedule[1][2].service = "Hair dressing with make up";
-    schedule[1][2].status = "Booked";
-
-    schedule[2][4].isBooked = true;
-    schedule[2][4].customerName = "Wedding Party C";
-    schedule[2][4].staffName = "Sarah Jenkins";
-    schedule[2][4].service = "Wedding Event";
-    schedule[2][4].status = "Completed";
-}
-
-// use teammate data to load Appointment
-void loadSmallAppointments() {
+// use teammate data to load Services
+void loadService() {
 
     if (bookingCount == 0) {
         cout << "No booking data available for reporting.\n";
@@ -371,14 +351,33 @@ void getCurrentSystemTime(int& year, int& month, int& day, int& hour) {
     hour = localTime.tm_hour;
 }
 
-//use schedule[][] to load Appointment
-void loadEventAppointments() {
+//use schedule[][] to load Appointments
+void loadAppointments() {
     int year, month, currentDay, hour;
     getCurrentSystemTime(year, month, currentDay, hour);
 
+    // ** data created for run only ** //
     for (int dayIndex = 0; dayIndex < DAYS_IN_MONTH; dayIndex++) {
         for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
             Timeslot& slot = schedule[dayIndex][slotIndex];
+
+            schedule[0][0].isBooked = true;
+            schedule[0][0].customerName = "Wedding Party A";
+            schedule[0][0].staffName = "Kim Ji Soo";
+            schedule[0][0].service = "Wedding Event";
+            schedule[0][0].status = "Booked";
+
+            schedule[1][2].isBooked = true;
+            schedule[1][2].customerName = "Makeup Client B";
+            schedule[1][2].staffName = "Sim Jia Yih";
+            schedule[1][2].service = "Hair dressing with make up";
+            schedule[1][2].status = "Booked";
+
+            schedule[2][4].isBooked = true;
+            schedule[2][4].customerName = "Wedding Party C";
+            schedule[2][4].staffName = "Sarah Jenkins";
+            schedule[2][4].service = "Wedding Event";
+            schedule[2][4].status = "Completed";
 
             //only load booked or completed timeslots
             if (!slot.isBooked) {
@@ -418,16 +417,6 @@ void loadEventAppointments() {
             report.timeSlot = slot.time;
             report.status = slot.status;
 
-            if (slot.service == "Wedding Event") {
-                slot.price = 200.00;
-            }
-            else if (slot.service == "Hair dressing with make up") {
-                slot.price = 150.00;
-            }
-            else {
-                slot.price = 0.00;
-            }
-
             appointmentCount++;
         }
     }
@@ -436,8 +425,8 @@ void loadEventAppointments() {
 void loadDataFromTeamSystem() {
     appointmentCount = 0;
 
-    loadSmallAppointments();
-    loadEventAppointments();
+    loadService();
+    loadAppointments();
 }
 
 // ** Display Logo ** //
@@ -748,7 +737,6 @@ void reportingMenu() {
 // MAIN
 int main() {
     logo();
-    setupTestData();
     loadDataFromTeamSystem();
 
     cout << "\n[System] Team data loaded successfully!" << endl;
