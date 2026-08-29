@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <iomanip>
 #include <limits>
 #include <cctype>
@@ -92,11 +93,6 @@ struct Timeslot {
     double price;
 };
 
-const string RESET = "\033[0m";
-const string RED = "\033[31m";
-const string GREEN = "\033[32m";
-const string YELLOW = "\033[93m";
-
 int appointmentCounter = 1001;
 const int TOTAL_SLOTS = 7;
 const int MONTH_IN_YEAR = 12;
@@ -113,7 +109,7 @@ Timeslot defaultDaySlots[TOTAL_SLOTS] = {
     {7, "09:00 PM - 11:00 PM", "", false, "", "", "", "", "", "", 0}
 };
 
-Timeslot schedule[DAYS_IN_MONTH][TOTAL_SLOTS];
+Timeslot schedule[MONTH_IN_YEAR][DAYS_IN_MONTH][TOTAL_SLOTS];
 
 //=======================from junsheng=======================
 struct Services {
@@ -137,7 +133,7 @@ const int MAX_SERVICES = 100;
 const int MAX_BOOKINGS = 100;
 
 int serviceCount = 5;
-int bookingCount = 0;
+int bookingCount = 10;
 
 int serviceCounter = 1001;
 int bookingCounter = 1001;
@@ -208,7 +204,58 @@ int findBookingIndex(const string& id) {
     }
     return -1;
 }
-/////// ========================================================================================================== ///////
+
+//=======================from haozeng=======================
+void inYearlySchedule() {
+    for (int month = 0; month < MONTH_IN_YEAR; month++) {
+        for (int day = 0; day < DAYS_IN_MONTH; day++) {
+            for (int slot = 0; slot < TOTAL_SLOTS; slot++) {
+                schedule[month][day][slot] = defaultDaySlots[slot];
+            }
+        }
+    }
+}
+
+void LoadScheduleFromFile() {
+    ifstream inFile("schedule_data.txt");
+    if (!inFile) return;
+
+    string line;
+    while (getline(inFile, line)) {
+        if (line.empty()) continue;
+        stringstream slotdata(line);
+        string item;
+        int monthIndex, dayIndex, slotIndex;
+        getline(slotdata, item, '|'); monthIndex = stoi(item);
+        getline(slotdata, item, '|'); dayIndex = stoi(item);
+        getline(slotdata, item, '|'); slotIndex = stoi(item);
+
+        getline(slotdata, item, '|'); schedule[monthIndex][dayIndex][slotIndex].isBooked = (item == "1");
+        getline(slotdata, schedule[monthIndex][dayIndex][slotIndex].appointmentID, '|');
+        getline(slotdata, schedule[monthIndex][dayIndex][slotIndex].status, '|');
+        getline(slotdata, schedule[monthIndex][dayIndex][slotIndex].staffID, '|');
+        getline(slotdata, schedule[monthIndex][dayIndex][slotIndex].staffName, '|');
+        getline(slotdata, schedule[monthIndex][dayIndex][slotIndex].customerID, '|');
+        getline(slotdata, schedule[monthIndex][dayIndex][slotIndex].customerName, '|');
+        getline(slotdata, schedule[monthIndex][dayIndex][slotIndex].service, '|');
+        getline(slotdata, item, '|');
+        schedule[monthIndex][dayIndex][slotIndex].price = item.empty() ? 0.0 : stod(item);
+    }
+    inFile.close();
+}
+
+void getCurrentSystemTime(int& year, int& month, int& day, int& hour) {
+    time_t now = time(0);
+    tm localTime;
+
+    localtime_s(&localTime, &now);
+
+    year = 1900 + localTime.tm_year;
+    month = 1 + localTime.tm_mon;
+    day = localTime.tm_mday;
+    hour = localTime.tm_hour;
+}
+/////// =============================================###END###============================================================ ///////
 
 // ========================================
 // ======== Function Declarations =========
@@ -218,11 +265,13 @@ int findMemberIndex(const string& id);
 int findStaffIndex(const string& id);
 int findServiceIndex(const string& id);
 int findBookingIndex(const string& id);
-// reporting
+void inYearlySchedule();
+void LoadScheduleFromFile();
+void getCurrentSystemTime(int& year, int& month, int& day, int& hour);
+//=======================reporting=======================
 bool isValidDateRange(int month, int year, int week);
 void setupTestData();
 void loadService();
-void getCurrentSystemTime(int& year, int& month, int& day, int& hour);
 void loadAppointments();
 void loadDataFromTeamSystem();
 void logo();
@@ -231,10 +280,11 @@ void RevenueReport(ostream& out = cout);
 void StaffReport(ostream& out = cout);
 void ReportExport();
 void reportingMenu();
+void reporting();
 /////// ========================================================================================================== ///////
 
-// ** Reporting declare ** //
-struct Appointment {
+/////// ####################################### REPORTING ############################################ ///////
+struct TotalBooking_Report {
     string appointmentId;
     string customerName;
     string staffName;
@@ -248,8 +298,8 @@ struct Appointment {
     string status;
 };
 
-Appointment appointments[MAX_SIZE];
-int appointmentCount = 0;
+TotalBooking_Report bookingReport[MAX_SIZE];
+int Booking_reportCount = 0;
 
 bool isValidDateRange(int month, int year, int week) {
     if (month < 1 || month > 12) {
@@ -285,70 +335,57 @@ void loadService() {
             continue;
         }
         // Stop if report array capacity is reached MAX_SIZE
-        if (appointmentCount >= MAX_SIZE) {
+        if (Booking_reportCount >= MAX_SIZE) {
             cout << "Report data is full.\n";
             return;
         }
 
         const Services& service = servicesDB[serviceIdx];
-        appointments[appointmentCount].appointmentId = booking.bookingID;
+        bookingReport[Booking_reportCount].appointmentId = booking.bookingID;
 
         // Fetch customer name from Customer & Member database
         int custIdx = findCustomerIndex(booking.customerID);
         if (custIdx != -1) {
-            appointments[appointmentCount].customerName = customerDB[custIdx].nameCustomer;
+            bookingReport[Booking_reportCount].customerName = customerDB[custIdx].nameCustomer;
         }
         else {
             int memIdx = findMemberIndex(booking.customerID);
             if (memIdx != -1) {
-                appointments[appointmentCount].customerName = memberDB[memIdx].nameMember;
+                bookingReport[Booking_reportCount].customerName = memberDB[memIdx].nameMember;
             }
             else {
-                appointments[appointmentCount].customerName = booking.customerID;
+                bookingReport[Booking_reportCount].customerName = booking.customerID;
             }
         }
         // Fetch staff name from Staff database
         int staffIdx = findStaffIndex(booking.staffID);
         if (staffIdx != -1) {
-            appointments[appointmentCount].staffName = staffDB[staffIdx].nameStaff;
+            bookingReport[Booking_reportCount].staffName = staffDB[staffIdx].nameStaff;
         }
         else {
-            appointments[appointmentCount].staffName = booking.staffID;
+            bookingReport[Booking_reportCount].staffName = booking.staffID;
         }
         // Set service details, quantity, and pric
-        appointments[appointmentCount].serviceName = service.servicename;
-        appointments[appointmentCount].quantity = 1;
-        appointments[appointmentCount].price = service.price;
+        bookingReport[Booking_reportCount].serviceName = service.servicename;
+        bookingReport[Booking_reportCount].quantity = 1;
+        bookingReport[Booking_reportCount].price = service.price;
 
         if (booking.date.length() >= 10) {
-            appointments[appointmentCount].day = stoi(booking.date.substr(0, 2));
-            appointments[appointmentCount].month = stoi(booking.date.substr(3, 2));
-            appointments[appointmentCount].year = stoi(booking.date.substr(6, 4));
+            bookingReport[Booking_reportCount].day = stoi(booking.date.substr(0, 2));
+            bookingReport[Booking_reportCount].month = stoi(booking.date.substr(3, 2));
+            bookingReport[Booking_reportCount].year = stoi(booking.date.substr(6, 4));
         }
         else {
-            appointments[appointmentCount].day = 1;
-            appointments[appointmentCount].month = 8;
-            appointments[appointmentCount].year = 2026;
+            bookingReport[Booking_reportCount].day = 1;
+            bookingReport[Booking_reportCount].month = 8;
+            bookingReport[Booking_reportCount].year = 2026;
         }
 
-        appointments[appointmentCount].timeSlot = booking.time;
-        appointments[appointmentCount].status = booking.status;
+        bookingReport[Booking_reportCount].timeSlot = booking.time;
+        bookingReport[Booking_reportCount].status = booking.status;
 
-        appointmentCount++;
+        Booking_reportCount++;
     }
-}
-
-//=======================from haozeng=======================
-void getCurrentSystemTime(int& year, int& month, int& day, int& hour) {
-    time_t now = time(0);
-    tm localTime;
-
-    localtime_s(&localTime, &now);
-
-    year = 1900 + localTime.tm_year;
-    month = 1 + localTime.tm_mon;
-    day = localTime.tm_mday;
-    hour = localTime.tm_hour;
 }
 
 //use schedule[][] to load Appointments
@@ -357,73 +394,43 @@ void loadAppointments() {
     getCurrentSystemTime(year, month, currentDay, hour);
 
     // ** data created for run only ** //
-    for (int dayIndex = 0; dayIndex < DAYS_IN_MONTH; dayIndex++) {
-        for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
-            Timeslot& slot = schedule[dayIndex][slotIndex];
+    for (int monthIndex = 0; monthIndex < MONTH_IN_YEAR; monthIndex++) {
+        for (int dayIndex = 0; dayIndex < DAYS_IN_MONTH; dayIndex++) {
+            for (int slotIndex = 0; slotIndex < TOTAL_SLOTS; slotIndex++) {
+                Timeslot& slot = schedule[monthIndex][dayIndex][slotIndex];
 
-            schedule[0][0].isBooked = true;
-            schedule[0][0].customerName = "Wedding Party A";
-            schedule[0][0].staffName = "Kim Ji Soo";
-            schedule[0][0].service = "Wedding Event";
-            schedule[0][0].status = "Booked";
 
-            schedule[1][2].isBooked = true;
-            schedule[1][2].customerName = "Makeup Client B";
-            schedule[1][2].staffName = "Sim Jia Yih";
-            schedule[1][2].service = "Hair dressing with make up";
-            schedule[1][2].status = "Booked";
+                //only load booked or completed timeslots
+                if (!slot.isBooked) {
+                    continue;
+                }
 
-            schedule[2][4].isBooked = true;
-            schedule[2][4].customerName = "Wedding Party C";
-            schedule[2][4].staffName = "Sarah Jenkins";
-            schedule[2][4].service = "Wedding Event";
-            schedule[2][4].status = "Completed";
+                if (Booking_reportCount >= MAX_SIZE) {
+                    cout << "Report data is full.\n";
+                    return;
+                }
 
-            //only load booked or completed timeslots
-            if (!slot.isBooked) {
-                continue;
+                TotalBooking_Report& report = bookingReport[Booking_reportCount];
+
+                //timeslot does not have appointmentID, so generate report ID using date + slot ID
+                report.appointmentId = slot.appointmentID;
+                report.customerName = slot.customerName;
+                report.staffName = slot.staffName;
+                report.serviceName = slot.service;
+                report.price = slot.price;
+                report.quantity = 1;
+                report.day = dayIndex + 1;
+                report.month = monthIndex + 1;
+                report.year = year;
+                report.timeSlot = slot.time;
+                report.status = slot.status;
             }
-
-            if (appointmentCount >= MAX_SIZE) {
-                cout << "Report data is full.\n";
-                return;
-            }
-
-            if (slot.service == "Wedding Event") {
-                slot.price = 200.00;
-            }
-            else if (slot.service == "Hair dressing with make up") {
-                slot.price = 150.00;
-            }
-            else {
-                slot.price = 0.00;
-            }
-
-            Appointment& report = appointments[appointmentCount];
-
-            //timeslot does not have appointmentID, so generate report ID using date + slot ID
-            report.appointmentId = "EVENT-D" + to_string(dayIndex + 1) + "-S" + to_string(slot.num);               
-
-            report.customerName = slot.customerName;
-            report.staffName = slot.staffName;
-            report.serviceName = slot.service;
-            report.price = slot.price;
-            report.quantity = 1;
-
-            // schedule[0] represents the 1st day of the month
-            report.day = dayIndex + 1;
-            report.month = month;
-            report.year = year;
-            report.timeSlot = slot.time;
-            report.status = slot.status;
-
-            appointmentCount++;
         }
     }
 }
 
 void loadDataFromTeamSystem() {
-    appointmentCount = 0;
+    Booking_reportCount = 0;
 
     loadService();
     loadAppointments();
@@ -453,16 +460,16 @@ void displayBarchart(string reportTitle, int month, int year, int weekFilter, in
     double values[MAX_SIZE] = { 0 };
     int count = 0;
 
-    for (int i = 0; i < appointmentCount; i++) {
-        int currentWeek = (appointments[i].day - 1) / 7 + 1;
+    for (int i = 0; i < Booking_reportCount; i++) {
+        int currentWeek = (bookingReport[i].day - 1) / 7 + 1;
         bool weekMatch = (weekFilter == 0) || (currentWeek == weekFilter);
 
-        if ((appointments[i].status == "Booked" || appointments[i].status == "Completed") &&
-            appointments[i].month == month &&
-            appointments[i].year == year && weekMatch)
+        if ((bookingReport[i].status == "Booked" || bookingReport[i].status == "Completed") &&
+            bookingReport[i].month == month &&
+            bookingReport[i].year == year && weekMatch)
         {
-            string key = (type == 1) ? appointments[i].serviceName : appointments[i].staffName;
-            double val = (type == 1) ? (appointments[i].quantity * appointments[i].price) : appointments[i].quantity;
+            string key = (type == 1) ? bookingReport[i].serviceName : bookingReport[i].staffName;
+            double val = (type == 1) ? (bookingReport[i].quantity * bookingReport[i].price) : bookingReport[i].quantity;
 
             bool found = false;
             for (int j = 0; j < count; j++) {
@@ -527,22 +534,22 @@ void RevenueReport(ostream& out) {
     int serviceTypeCount = 0;
     double totalRevenue = 0.0;
 
-    for (int i = 0; i < appointmentCount; i++) {
+    for (int i = 0; i < Booking_reportCount; i++) {
         // Calculate current week number (Week 1 to 5)
-        int currentWeek = (appointments[i].day - 1) / 7 + 1;
+        int currentWeek = (bookingReport[i].day - 1) / 7 + 1;
         bool weekMatch = (targetWeek == 0) || (currentWeek == targetWeek);
 
-        if ((appointments[i].status == "Booked" || appointments[i].status == "Completed") &&
-            appointments[i].month == targetMonth &&
-            appointments[i].year == targetYear &&
+        if ((bookingReport[i].status == "Booked" || bookingReport[i].status == "Completed") &&
+            bookingReport[i].month == targetMonth &&
+            bookingReport[i].year == targetYear &&
             weekMatch) {
 
             // Check if service already exists in the list
-            double amount = appointments[i].quantity * appointments[i].price;  
+            double amount = bookingReport[i].quantity * bookingReport[i].price;  
             bool found = false;
             for (int j = 0; j < serviceTypeCount; j++) {
-                if (serviceNames[j] == appointments[i].serviceName) {
-                    serviceQty[j] += appointments[i].quantity;
+                if (serviceNames[j] == bookingReport[i].serviceName) {
+                    serviceQty[j] += bookingReport[i].quantity;
                     serviceRevenue[j] += amount;
                     found = true;
                     break;
@@ -550,9 +557,9 @@ void RevenueReport(ostream& out) {
             }
             // Add new service entry if not found in the list
             if (!found) {
-                serviceNames[serviceTypeCount] = appointments[i].serviceName;
-                serviceQty[serviceTypeCount] = appointments[i].quantity;
-                serviceUnitPrice[serviceTypeCount] = appointments[i].price;
+                serviceNames[serviceTypeCount] = bookingReport[i].serviceName;
+                serviceQty[serviceTypeCount] = bookingReport[i].quantity;
+                serviceUnitPrice[serviceTypeCount] = bookingReport[i].price;
                 serviceRevenue[serviceTypeCount] = amount;
                 serviceTypeCount++;
             }
@@ -625,28 +632,28 @@ void StaffReport(ostream& out) {
     int uniqueStaff = 0;
     int totalServicesHandled = 0;
 
-    for (int i = 0; i < appointmentCount; i++) {
+    for (int i = 0; i < Booking_reportCount; i++) {
         // Calculate current week number (Week 1 to 5)
-        int currentWeek = (appointments[i].day - 1) / 7 + 1;
+        int currentWeek = (bookingReport[i].day - 1) / 7 + 1;
         bool weekMatch = (targetWeek == 0) || (currentWeek == targetWeek);
 
-        if ((appointments[i].status == "Booked" || appointments[i].status == "Completed") &&  
-            appointments[i].month == targetMonth &&
-            appointments[i].year == targetYear && weekMatch)
+        if ((bookingReport[i].status == "Booked" || bookingReport[i].status == "Completed") &&  
+            bookingReport[i].month == targetMonth &&
+            bookingReport[i].year == targetYear && weekMatch)
         {
             bool found = false;
             // Check if service already exists in the list
             for (int j = 0; j < uniqueStaff; j++) {
-                if (staffNames[j] == appointments[i].staffName) {
-                    serviceCounts[j] += appointments[i].quantity;
+                if (staffNames[j] == bookingReport[i].staffName) {
+                    serviceCounts[j] += bookingReport[i].quantity;
                     found = true;
                     break;
                 }
             }
             // Add new staff entry if not found in the list
             if (!found) {
-                staffNames[uniqueStaff] = appointments[i].staffName;
-                serviceCounts[uniqueStaff] = appointments[i].quantity;
+                staffNames[uniqueStaff] = bookingReport[i].staffName;
+                serviceCounts[uniqueStaff] = bookingReport[i].quantity;
                 uniqueStaff++;
             }
         }
@@ -734,16 +741,7 @@ void reportingMenu() {
     cout << "Please choose an option: ";
 }
 
-// MAIN
-int main() {
-    logo();
-    loadDataFromTeamSystem();
-
-    cout << "\n[System] Team data loaded successfully!" << endl;
-    cout << "[System] Services: " << serviceCount
-        << " | Staff: " << staffCount
-        << " | Appointments: " << appointmentCount << endl;
-
+void reporting() {
     int option;
     do {
         reportingMenu();
@@ -775,6 +773,14 @@ int main() {
         }
 
     } while (option != 0);
+}
+
+// MAIN
+int main() {
+    inYearlySchedule();
+    LoadScheduleFromFile();
+    loadDataFromTeamSystem();
+    reporting();
 
     return 0;
 }
