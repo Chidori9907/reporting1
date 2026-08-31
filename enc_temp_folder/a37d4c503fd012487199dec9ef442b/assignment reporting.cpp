@@ -716,7 +716,8 @@ void ReportExport() {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-        cout << "\nInvalid date range! Report export failed!" << endl;      // if invalid,stop the process
+        cout << "\nInvalid date range!" << endl;
+        cout << "\n--> Report export failed!" << endl;           // if invalid,stop the process
         return;
     }
 
@@ -734,7 +735,7 @@ void ReportExport() {
     }
 
     outFile.close();
-    cout << "\nReport printed successfully!" << endl;
+    cout << "\n--> Report printed successfully!" << endl;
 }
 
 // Display Menu
