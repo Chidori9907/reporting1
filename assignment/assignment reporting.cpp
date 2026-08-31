@@ -276,8 +276,8 @@ void loadAppointments();
 void loadDataFromTeamSystem();
 void logo();
 void displayBarchart(string reportTitle, int month, int year, int weekFilter, int type, ostream& out = cout);
-void RevenueReport(ostream& out = cout);
-void StaffReport(ostream& out = cout);
+void RevenueReport(int month = -1, int year = -1, int week = -1, ostream& out = cout);
+void StaffReport(int month = -1, int year = -1, int week = -1, ostream& out = cout);
 void ReportExport();
 void reportingMenu();
 void reporting();
@@ -517,21 +517,24 @@ void displayBarchart(string reportTitle, int month, int year, int weekFilter, in
 }
 
 // ** Revenue Report ** //
-void RevenueReport(ostream& out) {
-    int targetMonth, targetYear, targetWeek;
-    cout << "\nEnter MM/YYYY/W (week0 is for Monthly): ";
-    
-    if (!(cin >> targetMonth >> targetYear >> targetWeek) ||
-        !isValidDateRange(targetMonth, targetYear, targetWeek)) {
+void RevenueReport(int month, int year, int week, ostream& out) {
+    int targetMonth = month;
+    int targetYear = year;
+    int targetWeek = week;
+    if (&out == &cout && (targetMonth == -1 || targetYear == -1 || targetWeek == -1)) {
+        cout << "\nEnter MM/YYYY/W (week0 is for Monthly): ";
 
-        // Clear all characters until newline
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        if (!(cin >> targetMonth >> targetYear >> targetWeek) ||
+            !isValidDateRange(targetMonth, targetYear, targetWeek)) {
 
-        cout << "\nInvalid date range!" << endl;
-        return;
+            // Clear all characters until newline
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            cout << "\nInvalid date range!" << endl;
+            return;
+        }
     }
-
     loadDataFromTeamSystem(); 
 
     string serviceNames[MAX_SIZE];
@@ -617,19 +620,23 @@ void RevenueReport(ostream& out) {
 }
 
 // ** Staff Report ** //
-void StaffReport(ostream& out) {
-    int targetMonth, targetYear, targetWeek;
-    cout << "\nEnter MM/YYYY/W (week0 is for Monthly): ";
-    
-    if (!(cin >> targetMonth >> targetYear >> targetWeek) ||
-        !isValidDateRange(targetMonth, targetYear, targetWeek)) {
+void StaffReport(int month, int year, int week, ostream& out) {
+    int targetMonth = month;
+    int targetYear = year;
+    int targetWeek = week;
+    if (&out == &cout && (targetMonth == -1 || targetYear == -1 || targetWeek == -1)) {
+        cout << "\nEnter MM/YYYY/W (week0 is for Monthly): ";
 
-        // Clear all characters until newline
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        if (!(cin >> targetMonth >> targetYear >> targetWeek) ||
+            !isValidDateRange(targetMonth, targetYear, targetWeek)) {
 
-        cout << "\nInvalid date range!" << endl;
-        return; 
+            // Clear all characters until newline
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            cout << "\nInvalid date range!" << endl;
+            return;
+        }
     }
 
     loadDataFromTeamSystem();
@@ -727,10 +734,10 @@ void ReportExport() {
     }
 
     if (exportChoice == 1) {
-        RevenueReport(outFile);
+        RevenueReport(targetMonth, targetYear, targetWeek, outFile);
     }
     else {
-        StaffReport(outFile);
+        StaffReport(targetMonth, targetYear, targetWeek, outFile);
     }
 
     outFile.close();
